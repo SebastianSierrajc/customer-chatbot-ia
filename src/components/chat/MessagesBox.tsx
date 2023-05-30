@@ -5,7 +5,7 @@ import { MessageInterface } from '@/types/Message'
 import { useEffect, useRef } from 'react'
 import Message from './Message'
 
-const MessagesBox = ({ messages }: { messages: MessageInterface[] }) => {
+const MessagesBox = ({ messages, isResponding }: { messages: MessageInterface[],  isResponding: boolean }) => {
     const messagesEndRef = useRef<HTMLDivElement |  null>(null)
 
     const scrollToBottom = () => {
@@ -27,6 +27,17 @@ const MessagesBox = ({ messages }: { messages: MessageInterface[] }) => {
                     isIncomming={message.isIncomming}
                 />
             ))}
+            {isResponding && (
+                <div className="flex w-full mt-2 space-x-3 max-w-xs">
+                <div>
+                    <div className="bg-gray-300 p-3 rounded-r-lg rounded-bl-lg">
+                        <p className="text-sm">
+                            ...
+                        </p>
+                    </div>
+                </div>
+            </div>
+            )}
             <div ref={messagesEndRef} />
         </div>
     )
