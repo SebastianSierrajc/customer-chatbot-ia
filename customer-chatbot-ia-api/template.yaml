@@ -1,0 +1,58 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  customer-chatbot-ia-api
+
+  Sample SAM Template for customer-chatbot-ia-api
+
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 900
+  Api:
+    Cors:
+      AllowMethods: "'GET,POST,OPTIONS'"
+      AllowHeaders: "'content-type'"
+      AllowOrigin: "'*'"
+
+Resources:
+  LangChainOrchestratorFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: lang_chain_orchestrator/
+      Handler: app.lambda_handler
+      Runtime: python3.10
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          KENDRA_INDEX_ID: ""
+          OPENAI_API_KEY: ""
+          FLAN_XL_ENDPOINT: ""
+      Policies:
+      - Statement:
+        - Sid: KendraQueryPolicy
+          Effect: Allow
+          Action:
+          - kendra:Query
+          Resource: '*'
+      Events:
+        Chatbot:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /chatbot
+            Method: post
+
+Outputs:
+  # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
+  # Find out more about other implicit resources you can reference within SAM
+  # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
+  ChatbotApi:
+    Description: "API Gateway endpoint URL for Prod stage for LangChainOrchestrator function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/chatbot/"
+  LangChainOrchestratorFunction:
+    Description: "LangChainOrchestratorLambda Function ARN"
+    Value: !GetAtt LangChainOrchestratorFunction.Arn
+  LangChainOrchestratorIamRole:
+    Description: "Implicit IAM Role created for LangChainOrchestrator function"
+    Value: !GetAtt LangChainOrchestratorFunctionRole.Arn
